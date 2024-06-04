@@ -1,0 +1,49 @@
+# Import Active Directory module
+Import-Module ActiveDirectory
+
+# Path to the CSV file
+$csvPath = "C:\path\to\kasutajad.csv"
+
+# Check if the CSV file exists
+if (-Not (Test-Path -Path $csvPath)) {
+    Write-Host "CSV file not found at path $csvPath"
+    exit
+}
+
+# Import CSV file
+$users = Import-Csv -Path $csvPath
+
+# Iterate over each user in the CSV
+foreach ($user in $users) {
+    # Extract user properties
+    $firstName = $user.Eesnimi
+    $lastName = $user.Perekonnanimi
+    $department = $user.Osakond
+    $username = "$($firstName).$($lastName)"
+    $password = "StandardPassword123"  # This should be securely generated and managed
+    $ou = "OU=$department,DC=yourdomain,DC=com"
+
+    # Construct the Distinguished Name (DN) for the new user
+    $userDN = "CN=$username,$ou"
+
+    # Create a hashtable for the user properties
+    $userProps = @{
+        SamAccountName = $username;
+        UserPrincipalName = "$username@yourdomain.com";
+        GivenName = $firstName;
+        Surname = $lastName;
+        Name = "$firstName $lastName";
+        DisplayName = "$firstName $lastName";
+        Path = $ou;
+        AccountPassword = (ConvertTo-SecureString $password -AsPlainText -Force);
+        Enabled = $true;
+    }
+
+    # Create the user in Active Directory
+    try {
+        New-ADUser @userProps
+        Write-Host "User $username created successfully in $ou"
+    } catch {
+        Write-Host "Failed to create user $username: $_"
+    }
+}
