@@ -41,6 +41,6 @@ foreach ($user in $users) {
         New-ADUser @userProps
         Write-Host "User $username created successfully in $ou"
     } catch {
-        Write-Host "Failed to create user $username: $_"
+        Write-Host "Failed to create user $username $_"
     }
 }
