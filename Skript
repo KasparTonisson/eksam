@@ -24,7 +24,7 @@ foreach ($user in $users) {
     $ou = "OU=$department,DC=oige,DC=ee"
 
     # Construct the Distinguished Name (DN) for the new user
-    $userDN = "CN=$username,$ou"
+    # No need to manually construct the $userDN
 
     # Create a hashtable for the user properties
     $userProps = @{
