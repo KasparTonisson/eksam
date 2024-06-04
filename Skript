@@ -2,7 +2,7 @@
 Import-Module ActiveDirectory
 
 # Path to the CSV file
-$csvPath = "C:\path\to\kasutajad.csv"
+$csvPath = "C:\Users\Administrator\Downloads\kasutajad.csv"
 
 # Check if the CSV file exists
 if (-Not (Test-Path -Path $csvPath)) {
@@ -20,8 +20,8 @@ foreach ($user in $users) {
     $lastName = $user.Perekonnanimi
     $department = $user.Osakond
     $username = "$($firstName).$($lastName)"
-    $password = "StandardPassword123"  # This should be securely generated and managed
-    $ou = "OU=$department,DC=yourdomain,DC=com"
+    $password = "Passw0rd"  # This should be securely generated and managed
+    $ou = "OU=$department,DC=oige,DC=ee"
 
     # Construct the Distinguished Name (DN) for the new user
     $userDN = "CN=$username,$ou"
@@ -29,7 +29,7 @@ foreach ($user in $users) {
     # Create a hashtable for the user properties
     $userProps = @{
         SamAccountName = $username
-        UserPrincipalName = "$username@yourdomain.com"
+        UserPrincipalName = "$username@oige.ee"
         GivenName = $firstName
         Surname = $lastName
         Name = "$firstName $lastName"
