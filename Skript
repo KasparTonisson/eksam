@@ -10,8 +10,8 @@ if (-Not (Test-Path -Path $csvPath)) {
     exit
 }
 
-# Import CSV file
-$users = Import-Csv -Path $csvPath
+# Import CSV file with skipping the header row
+$users = Import-Csv -Path $csvPath -Header 'Eesnimi', 'Perekonnanimi', 'Osakond'
 
 # Iterate over each user in the CSV
 foreach ($user in $users) {
