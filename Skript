@@ -28,15 +28,15 @@ foreach ($user in $users) {
 
     # Create a hashtable for the user properties
     $userProps = @{
-        SamAccountName = $username;
-        UserPrincipalName = "$username@yourdomain.com";
-        GivenName = $firstName;
-        Surname = $lastName;
-        Name = "$firstName $lastName";
-        DisplayName = "$firstName $lastName";
-        Path = $ou;
-        AccountPassword = (ConvertTo-SecureString $password -AsPlainText -Force);
-        Enabled = $true;
+        SamAccountName = $username
+        UserPrincipalName = "$username@yourdomain.com"
+        GivenName = $firstName
+        Surname = $lastName
+        Name = "$firstName $lastName"
+        DisplayName = "$firstName $lastName"
+        Path = $ou
+        AccountPassword = (ConvertTo-SecureString $password -AsPlainText -Force)
+        Enabled = $true
     }
 
     # Create the user in Active Directory
