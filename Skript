@@ -1,57 +1,53 @@
-# Impordi vajalikud moodulid
-Import-Module ActiveDirectory
+#############################
+#        03.02.2022         #
+#      Kaspar Tõnisson      #
+#          IT-21            #
+#############################
 
-# Seaded serveri ja OU väärtused
-$Server = "ldap.oige.ee"
+cls
 
-# Loe sisendfail
-$users = Import-Csv "C:\Users\Administrator\Downloads\kasutajad.csv"
+#Loeme sisse kasutajad
+$users = Import-Csv C:\Users\Administrator\Downloads\kasutajad.csv
 
-# Loo tühi loend OU-de jaoks
-$createdOUs = @()
+#Teen tsükkli mis kontrollib kus OUs on kasutajad
+#Juhul kui OUd pole, teeb ta uue
 
-# Loo ühendus Active Directory serveriga
-$connection = Connect-ADComputer -Server $Server
+foreach($user in $users) {
 
-# Itera kõikide kasutajate kohta failis
-foreach ($user in $users) {
-    # Välja võtmine kasutaja info
-    $FirstName = $user.Eesnimi
-    $LastName = $user.Perekonnanimi
-    $Department = $user.Osakond
+    #Teen muutujad
+    $nimi = $user.Eesnimi + " " + $user.Perekonnanimi
+    $SAM = ($user.Eesnimi[0]+$user.Perekonnanimi).ToLower()
+    $UPN = ($user.Eesnimi).ToLower() + "." + ($user.Perekonnanimi).ToLower()+"@oige.ee"
+    $parool = (ConvertTo-SecureString -AsPlainText "Passw0rd" -Force)
+    $OU = ($user.osakond).ToUpper()
+    $parent = 'OU=KASUTAJAD,DC=oige,DC=ee'
+    $OUS = 'OU='+$OU+',OU=KASUTAJAD,DC=oige,DC=ee'
+   
 
-    # Lisa OU loendisse, kui unikaalne
-    if (!$createdOUs.Contains($Department)) {
-        $createdOUs += $Department
-
-        # Loo OU, kui see pole olemas
-        $ouPath = "OU=$Department"
-        New-ADOrganizationalUnit -Name $Department -Path $ouPath -ErrorAction SilentlyContinue
+    #Kui OU puudub, siis teeb selle
+    if (Get-ADOrganizationalUnit -Filter "Name -eq '$OU'"){
+        Write-Host "$OU already exists."
+    } else {
+        New-ADOrganizationalUnit -Name $OU -path $parent
     }
 
-    # Kasutaja DN moodustamine vastavas OU-s
-    $userDn = "CN=$FirstName $LastName,$ouPath"
+try{
+    (Get-ADUser $SAM).sAMAccountName
+    $olemas = $true
+    $ER = Write-Host "$SAM, on juba olemas"
 
-    # Kasutaja objekti loomine
-    $userObject = New-Object PSObject -Property @{
-        name = "$FirstName $LastName"
-        samAccountName = "$($FirstName[0]).$($LastName)"
-        surname = $LastName
-        givenName = $FirstName
-        department = $Department
-        # Seadista vaikimisi salasõna (asenda tegelikku parooliga)
-        accountPassword = ConvertTo-SecureString("Passw0rd") -AsPlainText -Force
-    }
 
-    # Lisa kasutaja vastavasse OU-sse
-    New-ADUser -Instance $userObject -ErrorAction SilentlyContinue
+}
+#Teeb kasutajad kui neid pole
+catch [Microsoft.ActiveDirectory.Management.ADIdentityResolutionException]{
+New-ADUser -Name $nimi -GivenName $user.Eesnimi -Surname $user.Perekonnanimi -SamAccountName $SAM -UserPrincipalName $UPN -AccountPassword $parool -DisplayName $nimi -ChangePasswordAtLogon $true -Path $OUS -Enabled $true
+
 }
 
-# Lõpeta ühendus Active Directory serveriga
-Disconnect-ADComputer $connection
+#Vaatab kas kasutaja on juba olemas ja kui on, siis ütleb millal lisati
 
-# Prindi loodud OU-de loend
-Write-Host "Loodud OU-d:"
-foreach ($ou in $createdOUs) {
-    Write-Host $ou
+
+$aeg = Get-ADUser $SAM -Properties whenCreated | Select whenCreated | Format-Table -HideTableHeaders
+$aeg1 = Out-String -InputObject $aeg
+$aeg2 = "Kasutaja $SAM lisati $aeg1"
 }
