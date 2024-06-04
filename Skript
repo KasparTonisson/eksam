@@ -17,14 +17,11 @@ $users = Import-Csv -Path $csvPath -Header 'Eesnimi', 'Perekonnanimi', 'Osakond'
 foreach ($user in $users) {
     # Extract user properties
     $firstName = $user.Eesnimi
-    $lastName = $user.Perekonnanimi
+    $lastName = $user.Perekonnanimi -replace ";", " "  # Replace comma with space
     $department = $user.Osakond
     $username = "$($firstName).$($lastName)"
     $password = "Passw0rd"  # This should be securely generated and managed
     $ou = "OU=$department,DC=oige,DC=ee"
-
-    # Construct the Distinguished Name (DN) for the new user
-    # No need to manually construct the $userDN
 
     # Create a hashtable for the user properties
     $userProps = @{
