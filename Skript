@@ -5,7 +5,7 @@ Import-Module ActiveDirectory
 $Server = "ldap.oige.ee"
 
 # Loe sisendfail
-$users = Import-Csv "kasutajad.csv"
+$users = Import-Csv "C:\Users\Administrator\Downloads\kasutajad.csv"
 
 # Loo tühi loend OU-de jaoks
 $createdOUs = @()
@@ -40,7 +40,7 @@ foreach ($user in $users) {
         givenName = $FirstName
         department = $Department
         # Seadista vaikimisi salasõna (asenda tegelikku parooliga)
-        accountPassword = ConvertTo-SecureString("salajaneParool" -AsPlainText -Force
+        accountPassword = ConvertTo-SecureString("Passw0rd") -AsPlainText -Force
     }
 
     # Lisa kasutaja vastavasse OU-sse
